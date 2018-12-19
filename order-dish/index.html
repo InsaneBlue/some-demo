@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>湖南人家啦啦啦</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <h1>点菜</h1>
+  
+  <div class="form">
+    <input class="num" type="text" placeholder="人数">
+    <input class="recipe-num" type="text" placeholder="菜的数目">
+    <button class="create-recipe">生成菜单</button>
+  </div>
+
+  <div class="recipe-box">
+    <div class="item">
+      <div class="name"></div>
+      <div class="price"></div>
+    </div>
+  </div>
+
+  <div class="price-box">
+
+    <div >
+      <span>总价</span>
+      <span class="total-price">0元</span>
+    </div>
+    <div >
+      <span>人均</span>
+      <span class="per-price">0元</span>
+    </div>
+
+  </div>
+</body>
+<script type="text/javascript">
+  class Fetch {
+    constructor({ baseUrl }) {
+      this.baseUrl = baseUrl;
+    }
+
+    get(url, data) {
+      this.ajax('GET', url, data);
+    }
+
+    post(url, data) {
+      this.ajax('POST', url, data);
+    }
+
+    ajax(method, url, data = {}, async = true) {
+      const xhr = new XMLHttpRequest();
+      const realUrl = this.baseUrl ? realUrl + url: url;
+      const params = this._parseParams(data);
+
+      
+      return new Promise((resolve, reject) => {
+        
+        if(method === 'GET') {
+          xhr.open(method, realUrl, async);
+          xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+          xhr.send(null);
+        }
+  
+        xhr.onreadystatechange = ()=> {
+          if(xhr.readyState === 4 && xhr.status === 200) {
+            resolve(JSON.parse(xhr.responseText));
+          }
+        };
+
+        xhr.onerror = ()=> {
+          reject('请求失败！');
+        }
+
+      });
+
+    }
+
+    _parseParams() {
+
+    }
+
+  }
+
+  const fetch = new Fetch({});
+
+  fetch.ajax('GET', 'https://api.ruyixianhua.cn/fun/orderMenu/getMenu?menuId=10000')
+    .then(data => {
+      console.log(data)
+    })
+</script>
+<script>
+  const recipe = [
+    { name: '爆炒手撕鸭', price: '38元', type: 1 },
+    { name: '干锅手撕鸡', price: '38元', type: 1 },
+    { name: '湘潭水煮活鱼', price: '50元', type: 1 },
+    { name: '野山椒牛肉', price: '36元', type: 1 },
+    { name: '酸菜鱼片', price: '58元', type: 1 },
+    { name: '孜然牛肉', price: '36元', type: 1 },
+    { name: '剁椒鱼头', price: '42元', type: 1 },
+    { name: '水煮牛肉', price: '36元', type: 1 },
+    { name: '红烧鲫鱼', price: '29元', type: 1 },
+    { name: '农家一碗香', price: '25元', type: 1 },
+    { name: '水煮鱼片', price: '26元', type: 1 },
+    { name: '农家小炒肉', price: '25元', type: 1 },
+    { name: '干煸四季豆', price: '16元', type: 2 },
+    { name: '酸辣小炒肉', price: '28元', type: 1 },
+    { name: '酸辣鸡杂', price: '28元', type: 1 },
+    { name: '爆炒手撕鸡', price: '36元', type: 1 },
+    { name: '家常豆腐', price: '16元', type: 2 },
+    { name: '大蒜腊肉', price: '35元', type: 1 },
+    { name: '油豆腐焖肉', price: '20元', type: 1 },
+    { name: '香煎豆腐', price: '16元', type: 2 },
+    { name: '凉拌皮蛋', price: '15元', type: 1 },
+    { name: '铁板水晶粉', price: '22元', type: 2 },
+    { name: '黄焖土鸡', price: '38元', type: 1 },
+    { name: '干爆鱼块', price: '28元', type: 1 },
+    { name: '湖南香辣鸡', price: '38元', type: 1 },
+    { name: '小炒茄子', price: '16元', type: 2 },
+    { name: '大蒜回锅肉', price: '28元', type: 1 },
+    { name: '茄子炒豆角', price: '18元', type: 2 },
+    { name: '爆炒猪肝', price: '25元', type: 1 },
+    { name: '咸鱼茄子煲', price: '20元', type: 1 },
+    { name: '辣子鸡', price: '38元', type: 1 },
+    { name: '攸县香干', price: '20元', type: 2 },
+    { name: '酸溜土豆丝', price: '12元', type: 2 },
+    { name: '大碗花菜', price: '22元', type: 2 },
+    { name: '红烧猪脚', price: '50元', type: 1 },
+    { name: '小炒土鸡', price: '38元', type: 1 },
+    { name: '凉拌黄瓜', price: '15元', type: 2 },
+    { name: '干煸泥鳅', price: '28元', type: 1 },
+    { name: '酸菜豆腐汤', price: '13元', type: 3 },
+    { name: '梅菜扣肉', price: '35元', type: 1 },
+    { name: '榨菜肉片汤', price: '15元', type: 3 },
+    { name: '干锅肥肠', price: '38元', type: 1 },
+    { name: '手撕包菜', price: '12元', type: 2 },
+    { name: '爆炒肥肠', price: '38元', type: 1 },
+    { name: '三鲜汤', price: '15元', type: 3 },
+    { name: '千锅田鸡', price: '36元', type: 1 },
+    { name: '酸辣豆芽', price: '12元', type: 2 },
+    { name: '爆炒田鸡', price: '36元', type: 1 },
+    { name: '葱花猪血汤', price: '15元', type: 3 },
+    { name: '油麦菜', price: '12元', type: 2 },
+    { name: '空心菜', price: '12元', type: 2 },
+    { name: '生菜', price: '12元', type: 2 },
+  ]
+
+  const recipeBoxDOM = document.querySelector('.recipe-box');
+  const totlaPriceDOM = document.querySelector('.total-price');
+  const perPriceDOM = document.querySelector('.per-price');
+
+  const numDOM = document.querySelector('.num')
+  const recipeNumDOM = document.querySelector('.recipe-num');
+  const recipeButtonDOM = document.querySelector('.create-recipe');
+
+  const vegetable = recipe.filter(value => value.type === 2);
+  const soup = recipe.filter(value => value.type === 3);
+  const meat = recipe.filter(value => value.type === 1);
+
+  const getRandom = (min = 1, max) => {
+    return Math.random() * (max - min) + min;
+  }
+
+  const getDiffValue = (num, arr) => {
+    const newArr = []
+    while(num) {
+      const index = parseInt(getRandom(1, arr.length));
+      const isNotIncluded = !newArr.some(value => value.name === arr[index].name);
+      if(isNotIncluded) {
+        newArr.push(arr[index]);
+        num --;
+      }
+    }
+    return newArr;
+  }
+
+  const randomRecipe = (num, meatNum, vegeNum, soupNum = 1) => {
+    const meatArr = getDiffValue(meatNum, meat);
+    const vegeArr = getDiffValue(vegeNum, vegetable);
+    const soupArr = getDiffValue(soupNum, soup);
+    
+    return [...meatArr, ...vegeArr, ...soupArr];
+  }
+
+  recipeButtonDOM.addEventListener('click', (e) => {
+    const num = parseInt(numDOM.value) || 9;
+    const recipeNum = parseInt(recipeNumDOM.value) || num - 1;
+    const meatNum = Math.ceil((recipeNum - 1) / 2);
+    const todayRecipe = randomRecipe(recipeNum, meatNum, recipeNum - 1 - meatNum, 1);
+
+    const htmlArr = todayRecipe.map(value => {
+      return `<div class="item">
+                <div class="name">${value.name}</div>
+                <div class="price">${value.price}</div>
+              </div>`
+    })
+
+    const totalPrice = todayRecipe.reduce((total, value)=> {
+      total += parseInt(value.price);
+      return total;
+    }, 0)
+    const perPrice = (totalPrice / num).toFixed(2);
+
+    recipeBoxDOM.innerHTML = htmlArr.join('');
+    totlaPriceDOM.innerHTML = totalPrice + '元';
+    perPriceDOM.innerHTML = perPrice + '元';
+  })
+
+</script>
+
+</html>

@@ -1,0 +1,25 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+.recipe-box {
+
+}
+.item {
+  display: flex;
+  justify-content: space-around;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  height: 100px;
+}
+.price-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  height: 50px;
+}
