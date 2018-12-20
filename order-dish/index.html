@@ -54,16 +54,19 @@
 
     ajax(method, url, data = {}, async = true) {
       const xhr = new XMLHttpRequest();
-      const realUrl = this.baseUrl ? realUrl + url: url;
-      const params = this._parseParams(data);
-
-      
+      const realUrl = this.baseUrl ? this.baseUrl + url: url;
+      const params = this._parseParams(method, data);
+   
       return new Promise((resolve, reject) => {
-        
+        xhr.open(method, realUrl, async);
+        xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+
         if(method === 'GET') {
-          xhr.open(method, realUrl, async);
-          xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
           xhr.send(null);
+        }
+
+        if(method === 'POST') {
+          xhr.send(params);
         }
   
         xhr.onreadystatechange = ()=> {
@@ -80,18 +83,41 @@
 
     }
 
-    _parseParams() {
-
+    _parseParams(method, data) {
+      if(method === 'GET') {
+        
+      }
+      if(method === 'POST') {
+        return JSON.parse(data);
+      }
+      return data;
     }
 
   }
 
-  const fetch = new Fetch({});
+  const fetch = new Fetch({
+    baseUrl: 'https://api.ruyixianhua.cn'
+    // baseUrl: 'http://localhost:7001'
+  });
 
-  fetch.ajax('GET', 'https://api.ruyixianhua.cn/fun/orderMenu/getMenu?menuId=10000')
-    .then(data => {
-      console.log(data)
-    })
+  // fetch.ajax('GET', '/fun/orderMenu/getDish?menu_id=10000')
+  //   .then(data => {
+  //     console.log(data)
+  //   })
+
+  
+  // const dish_list = [
+  //   { name: '番茄鸡蛋汤', price: '12元', type: 3 },
+  //   { name: '紫菜蛋汤', price: '12元', type: 3 },
+  // ]
+
+  // fetch.ajax('POST', '/fun/orderMenu/addDish', {
+  //   action: 'add',
+  //   menu_id: 10000,
+  //   dish_list,
+  // })
+
+
 </script>
 <script>
   const recipe = [
