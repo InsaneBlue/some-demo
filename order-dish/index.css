@@ -47,8 +47,8 @@ div {
 
   --text-1: #303133;
   --text-2: #606266;
-  --text-2: #909399;
-  --text-3: #C0C4CC;
+  --text-3: #909399;
+  --text-4: #C0C4CC;
   --border-1: #DCDFE6;
   --border-2: #E4E7ED;
   --border-3: #EBEEF5;
@@ -73,6 +73,8 @@ div {
   height: 40px;
   line-height: 40px;
 }
+
+/* 菜单列表 */
 
 .left-box-recipe-content, .left-box-recipe-title {
   display: flex;
@@ -107,4 +109,15 @@ div {
   text-align: center;
   color: var(--blue);
   font-weight: bold;
+}
+
+/* 随机菜单 */
+
+.random-button {
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+.random-price {
+  margin-top: 10px;
 }

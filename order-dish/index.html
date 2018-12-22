@@ -11,33 +11,7 @@
 </head>
 
 <body>
-  <!-- <h1>点菜</h1>
-  
-  <div class="form">
-    <input class="num" type="text" placeholder="人数">
-    <input class="recipe-num" type="text" placeholder="菜的数目">
-    <button class="create-recipe">生成菜单</button>
-  </div>
 
-  <div class="recipe-box">
-    <div class="item">
-      <div class="name"></div>
-      <div class="price"></div>
-    </div>
-  </div>
-
-  <div class="price-box">
-
-    <div >
-      <span>总价</span>
-      <span class="total-price">0元</span>
-    </div>
-    <div >
-      <span>人均</span>
-      <span class="per-price">0元</span>
-    </div>
-
-  </div> -->
   <h1>湖南人家</h1>
   <div id="app" v-cloak>
 
@@ -45,7 +19,39 @@
       <el-tabs type="card" stretch="true">
 
         <el-tab-pane label="随机菜单">
-          
+
+          <div class="random-config">
+            <el-form ref="form" :modle="randomConfig" :inline="true" size="medium" label-width="50px">
+              <el-form-item label="菜数">
+                <el-input-number v-model="randomConfig.dishNum" controls-position="right" :min="1" :max="10"></el-input-number>
+              </el-form-item>
+              <el-form-item label="人数">
+                <el-input-number v-model="randomConfig.personNum" controls-position="right" :min="1" :max="10"></el-input-number>
+              </el-form-item>
+              <el-form-item>
+                <el-button class="random-button" type="primary" @click="generateRandomRecipe" round>生成菜单</el-button>
+              </el-form-item>
+            </el-form>
+          </div>
+
+          <div class="random-result">
+            <div class="left-box-recipe-title">
+              <div>菜名</div>
+              <div>价格</div>
+              <div>类型</div>
+            </div>
+            <div class="left-box-recipe-content" v-for="(dish, index) in randomRecipe" :key="index">
+              <div>{{dish.name}}</div>
+              <div>{{dish.price | concatUnit}}</div>
+              <div>{{dish.type | mapDishType}}</div>
+            </div> 
+          </div>
+
+          <div class="random-price" v-if="totalPrice">
+            <div class="total-price">总价: {{totalPrice}}元</div>
+            <div class="per-price">人均: {{perPrice}}元</div>
+          </div>
+
         </el-tab-pane>
 
         <el-tab-pane label="自定义菜单">自定义菜单</el-tab-pane>
@@ -77,12 +83,9 @@
       </div>
     </div>
 
-
-
   </div>
 
   <script src="libs/ajax.js"></script>
-  <!-- <script src="libs/vue.min.js"></script> -->
   <script src="https://unpkg.com/vue/dist/vue.min.js"></script>
   <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 
@@ -99,7 +102,6 @@
 
   const fetch = new Fetch({
     baseUrl: 'https://api.ruyixianhua.cn'
-    // baseUrl: 'http://localhost:7001'
   });
 
   new Vue({
@@ -107,10 +109,14 @@
     data() {
       return {
         recipe: [],
+        randomRecipe: [],
+        totalPrice: 0,
+        perPrice: 0,
+        randomConfig: {
+          personNum: 1,
+          dishNum: 1,
+        }
       }
-    },
-    computed: {
-
     },
     created() {
       fetch.ajax('GET', '/fun/orderMenu/getDish?menu_id=10000')
@@ -119,7 +125,65 @@
         })
     },
     methods: {
+      // 生成随机菜单
+      generateRandomRecipe() {
+        const { recipe, randomConfig } = this;
+        let { personNum, dishNum} = randomConfig;
+        const { meatNum, vegeNum, soupNum} = this.getRecipeStructure(dishNum);
+        this.randomRecipe = this.buildRecipe({
+          meatNum,
+          vegeNum,
+          soupNum,
+        });
 
+        this.totalPrice = this.randomRecipe.reduce((total, value)=> {
+          total += parseInt(value.price);
+          return total;
+        }, 0);
+        this.perPrice = (this.totalPrice / personNum).toFixed(2);
+      },
+      // 获取菜单中各类型的组成结构
+      getRecipeStructure(dishNum) {
+        const meatNum = Math.ceil((dishNum - 1) / 2);
+        const vegeNum = dishNum - 1 - meatNum;
+        const soupNum = 1;
+        return {
+          meatNum,
+          vegeNum,
+          soupNum,
+        }
+      },
+      // 组成菜单
+      buildRecipe(config) {
+        const { meatNum, vegeNum, soupNum} = config;
+        const vegetable = this.recipe.filter(value => value.type === 2);
+        const soup = this.recipe.filter(value => value.type === 3);
+        const meat = this.recipe.filter(value => value.type === 1);
+
+        const meatArr = getDiffValue(meatNum, meat);
+        const vegeArr = getDiffValue(vegeNum, vegetable);
+        const soupArr = getDiffValue(soupNum, soup);
+        
+        return [...meatArr, ...vegeArr, ...soupArr];
+      },
+      // 根据数量生成随机不同的菜
+      getDiffValue(num, arr) {
+        const newArr = []
+        while(num) {
+          const index = parseInt(getRandom(1, arr.length));
+          const isNotIncluded = !newArr.some(value => value.name === arr[index].name);
+          if(isNotIncluded) {
+            newArr.push(arr[index]);
+            num --;
+          }
+        }
+        return newArr;
+      },
+      // 获取随机整数
+      getRandom (min = 1, max) {
+        if(max < min) return 1;
+        return Math.random() * (max - min) + min;
+      }
     },
     filters: {
       concatUnit(value) {
@@ -133,125 +197,4 @@
     }
   })
 </script>
-
-
-<script>
-  const recipe = [
-    { name: '爆炒手撕鸭', price: '38元', type: 1 },
-    { name: '干锅手撕鸡', price: '38元', type: 1 },
-    { name: '湘潭水煮活鱼', price: '50元', type: 1 },
-    { name: '野山椒牛肉', price: '36元', type: 1 },
-    { name: '酸菜鱼片', price: '58元', type: 1 },
-    { name: '孜然牛肉', price: '36元', type: 1 },
-    { name: '剁椒鱼头', price: '42元', type: 1 },
-    { name: '水煮牛肉', price: '36元', type: 1 },
-    { name: '红烧鲫鱼', price: '29元', type: 1 },
-    { name: '农家一碗香', price: '25元', type: 1 },
-    { name: '水煮鱼片', price: '26元', type: 1 },
-    { name: '农家小炒肉', price: '25元', type: 1 },
-    { name: '干煸四季豆', price: '16元', type: 2 },
-    { name: '酸辣小炒肉', price: '28元', type: 1 },
-    { name: '酸辣鸡杂', price: '28元', type: 1 },
-    { name: '爆炒手撕鸡', price: '36元', type: 1 },
-    { name: '家常豆腐', price: '16元', type: 2 },
-    { name: '大蒜腊肉', price: '35元', type: 1 },
-    { name: '油豆腐焖肉', price: '20元', type: 1 },
-    { name: '香煎豆腐', price: '16元', type: 2 },
-    { name: '凉拌皮蛋', price: '15元', type: 1 },
-    { name: '铁板水晶粉', price: '22元', type: 2 },
-    { name: '黄焖土鸡', price: '38元', type: 1 },
-    { name: '干爆鱼块', price: '28元', type: 1 },
-    { name: '湖南香辣鸡', price: '38元', type: 1 },
-    { name: '小炒茄子', price: '16元', type: 2 },
-    { name: '大蒜回锅肉', price: '28元', type: 1 },
-    { name: '茄子炒豆角', price: '18元', type: 2 },
-    { name: '爆炒猪肝', price: '25元', type: 1 },
-    { name: '咸鱼茄子煲', price: '20元', type: 1 },
-    { name: '辣子鸡', price: '38元', type: 1 },
-    { name: '攸县香干', price: '20元', type: 2 },
-    { name: '酸溜土豆丝', price: '12元', type: 2 },
-    { name: '大碗花菜', price: '22元', type: 2 },
-    { name: '红烧猪脚', price: '50元', type: 1 },
-    { name: '小炒土鸡', price: '38元', type: 1 },
-    { name: '凉拌黄瓜', price: '15元', type: 2 },
-    { name: '干煸泥鳅', price: '28元', type: 1 },
-    { name: '酸菜豆腐汤', price: '13元', type: 3 },
-    { name: '梅菜扣肉', price: '35元', type: 1 },
-    { name: '榨菜肉片汤', price: '15元', type: 3 },
-    { name: '干锅肥肠', price: '38元', type: 1 },
-    { name: '手撕包菜', price: '12元', type: 2 },
-    { name: '爆炒肥肠', price: '38元', type: 1 },
-    { name: '三鲜汤', price: '15元', type: 3 },
-    { name: '千锅田鸡', price: '36元', type: 1 },
-    { name: '酸辣豆芽', price: '12元', type: 2 },
-    { name: '爆炒田鸡', price: '36元', type: 1 },
-    { name: '葱花猪血汤', price: '15元', type: 3 },
-    { name: '油麦菜', price: '12元', type: 2 },
-    { name: '空心菜', price: '12元', type: 2 },
-    { name: '生菜', price: '12元', type: 2 },
-  ]
-
-  const recipeBoxDOM = document.querySelector('.recipe-box');
-  const totlaPriceDOM = document.querySelector('.total-price');
-  const perPriceDOM = document.querySelector('.per-price');
-
-  const numDOM = document.querySelector('.num')
-  const recipeNumDOM = document.querySelector('.recipe-num');
-  const recipeButtonDOM = document.querySelector('.create-recipe');
-
-  const vegetable = recipe.filter(value => value.type === 2);
-  const soup = recipe.filter(value => value.type === 3);
-  const meat = recipe.filter(value => value.type === 1);
-
-  const getRandom = (min = 1, max) => {
-    return Math.random() * (max - min) + min;
-  }
-
-  const getDiffValue = (num, arr) => {
-    const newArr = []
-    while(num) {
-      const index = parseInt(getRandom(1, arr.length));
-      const isNotIncluded = !newArr.some(value => value.name === arr[index].name);
-      if(isNotIncluded) {
-        newArr.push(arr[index]);
-        num --;
-      }
-    }
-    return newArr;
-  }
-
-  const randomRecipe = (num, meatNum, vegeNum, soupNum = 1) => {
-    const meatArr = getDiffValue(meatNum, meat);
-    const vegeArr = getDiffValue(vegeNum, vegetable);
-    const soupArr = getDiffValue(soupNum, soup);
-    
-    return [...meatArr, ...vegeArr, ...soupArr];
-  }
-
-  recipeButtonDOM.addEventListener('click', (e) => {
-    const num = parseInt(numDOM.value) || 9;
-    const recipeNum = parseInt(recipeNumDOM.value) || num - 1;
-    const meatNum = Math.ceil((recipeNum - 1) / 2);
-    const todayRecipe = randomRecipe(recipeNum, meatNum, recipeNum - 1 - meatNum, 1);
-
-    const htmlArr = todayRecipe.map(value => {
-      return `<div class="item">
-                <div class="name">${value.name}</div>
-                <div class="price">${value.price}</div>
-              </div>`
-    })
-
-    const totalPrice = todayRecipe.reduce((total, value)=> {
-      total += parseInt(value.price);
-      return total;
-    }, 0)
-    const perPrice = (totalPrice / num).toFixed(2);
-
-    recipeBoxDOM.innerHTML = htmlArr.join('');
-    totlaPriceDOM.innerHTML = totalPrice + '元';
-    perPriceDOM.innerHTML = perPrice + '元';
-  })
-
-</script>
-
 </html>
