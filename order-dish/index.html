@@ -7,10 +7,11 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>湖南人家啦啦啦</title>
   <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 </head>
 
 <body>
-  <h1>点菜</h1>
+  <!-- <h1>点菜</h1>
   
   <div class="form">
     <input class="num" type="text" placeholder="人数">
@@ -36,63 +37,64 @@
       <span class="per-price">0元</span>
     </div>
 
+  </div> -->
+  <h1>湖南人家</h1>
+  <div id="app" v-cloak>
+
+    <div class="left-box">
+      <el-tabs type="card" stretch="true">
+
+        <el-tab-pane label="随机菜单">
+          
+        </el-tab-pane>
+
+        <el-tab-pane label="自定义菜单">自定义菜单</el-tab-pane>
+
+        <el-tab-pane label="查看菜单">
+          <div class="left-box-menu">
+            <div class="left-box-menu-title">湖南人家</div>  
+            <div class="left-box-menu-decription">*菜单仅供参考,请以实际菜单为准</div>
+          </div>
+          <div class="left-box-recipe-title">
+            <div>菜名</div>
+            <div>价格</div>
+            <div>类型</div>
+          </div>
+          <div class="left-box-recipe-content" v-for="(dish, index) in recipe" :key="index">
+            <div>{{dish.name}}</div>
+            <div>{{dish.price | concatUnit}}</div>
+            <div>{{dish.type | mapDishType}}</div>
+          </div> 
+        </el-tab-pane>
+
+      </el-tabs>
+    </div>
+
+    <div class="right-box">
+      <div class="right-title">选择的菜单</div>
+      <div class="right-content">
+
+      </div>
+    </div>
+
+
+
   </div>
+
+  <script src="libs/ajax.js"></script>
+  <!-- <script src="libs/vue.min.js"></script> -->
+  <script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
 </body>
+
 <script type="text/javascript">
-  class Fetch {
-    constructor({ baseUrl }) {
-      this.baseUrl = baseUrl;
-    }
 
-    get(url, data) {
-      this.ajax('GET', url, data);
-    }
-
-    post(url, data) {
-      this.ajax('POST', url, data);
-    }
-
-    ajax(method, url, data = {}, async = true) {
-      const xhr = new XMLHttpRequest();
-      const realUrl = this.baseUrl ? this.baseUrl + url: url;
-      const params = this._parseParams(method, data);
-   
-      return new Promise((resolve, reject) => {
-        xhr.open(method, realUrl, async);
-        xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-
-        if(method === 'GET') {
-          xhr.send(null);
-        }
-
-        if(method === 'POST') {
-          xhr.send(params);
-        }
-  
-        xhr.onreadystatechange = ()=> {
-          if(xhr.readyState === 4 && xhr.status === 200) {
-            resolve(JSON.parse(xhr.responseText));
-          }
-        };
-
-        xhr.onerror = ()=> {
-          reject('请求失败！');
-        }
-
-      });
-
-    }
-
-    _parseParams(method, data) {
-      if(method === 'GET') {
-        
-      }
-      if(method === 'POST') {
-        return JSON.parse(data);
-      }
-      return data;
-    }
-
+  const typeMap = {
+    1: '荤菜',
+    2: '素菜',
+    3: '汤',
+    4: '半荤',
   }
 
   const fetch = new Fetch({
@@ -100,25 +102,39 @@
     // baseUrl: 'http://localhost:7001'
   });
 
-  // fetch.ajax('GET', '/fun/orderMenu/getDish?menu_id=10000')
-  //   .then(data => {
-  //     console.log(data)
-  //   })
+  new Vue({
+    el: '#app',
+    data() {
+      return {
+        recipe: [],
+      }
+    },
+    computed: {
 
-  
-  // const dish_list = [
-  //   { name: '番茄鸡蛋汤', price: '12元', type: 3 },
-  //   { name: '紫菜蛋汤', price: '12元', type: 3 },
-  // ]
+    },
+    created() {
+      fetch.ajax('GET', '/fun/orderMenu/getDish?menu_id=10000')
+        .then(data => {
+          this.recipe = data.body.dishList;
+        })
+    },
+    methods: {
 
-  // fetch.ajax('POST', '/fun/orderMenu/addDish', {
-  //   action: 'add',
-  //   menu_id: 10000,
-  //   dish_list,
-  // })
-
-
+    },
+    filters: {
+      concatUnit(value) {
+        if(!value || typeof value !== 'string') return '';
+        return value.split('.')[0] + ' 元';
+      },
+      mapDishType(type) {
+        if(!type || typeof type !== 'number') return '';
+        return typeMap[type];
+      }
+    }
+  })
 </script>
+
+
 <script>
   const recipe = [
     { name: '爆炒手撕鸭', price: '38元', type: 1 },
