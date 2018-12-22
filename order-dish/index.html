@@ -40,7 +40,7 @@
               <div>价格</div>
               <div>类型</div>
             </div>
-            <div class="left-box-recipe-content" v-for="(dish, index) in randomRecipe" :key="index">
+            <div class="left-box-recipe-content" v-for="(dish, index) in myRecipe" :key="index">
               <div>{{dish.name}}</div>
               <div>{{dish.price | concatUnit}}</div>
               <div>{{dish.type | mapDishType}}</div>
@@ -79,7 +79,7 @@
     <div class="right-box">
       <div class="right-title">选择的菜单</div>
       <div class="right-content">
-
+        {{detailRecipe}}
       </div>
     </div>
 
@@ -109,13 +109,23 @@
     data() {
       return {
         recipe: [],
-        randomRecipe: [],
+        myRecipe: [],
         totalPrice: 0,
         perPrice: 0,
         randomConfig: {
           personNum: 1,
           dishNum: 1,
-        }
+        },
+      }
+    },
+    computed: {
+      detailRecipe() {
+        const newRecipe = [];
+        return this.myRecipe.reduce((newRecipe, current) => {
+          const { type } = current;
+          newRecipe[type] ? newRecipe[type].push(current) : newRecipe[type] = [current];
+          return newRecipe;
+        }, newRecipe)
       }
     },
     created() {
@@ -130,13 +140,13 @@
         const { recipe, randomConfig } = this;
         let { personNum, dishNum} = randomConfig;
         const { meatNum, vegeNum, soupNum} = this.getRecipeStructure(dishNum);
-        this.randomRecipe = this.buildRecipe({
+        this.myRecipe = this.buildRecipe({
           meatNum,
           vegeNum,
           soupNum,
         });
 
-        this.totalPrice = this.randomRecipe.reduce((total, value)=> {
+        this.totalPrice = this.myRecipe.reduce((total, value)=> {
           total += parseInt(value.price);
           return total;
         }, 0);
@@ -160,9 +170,9 @@
         const soup = this.recipe.filter(value => value.type === 3);
         const meat = this.recipe.filter(value => value.type === 1);
 
-        const meatArr = getDiffValue(meatNum, meat);
-        const vegeArr = getDiffValue(vegeNum, vegetable);
-        const soupArr = getDiffValue(soupNum, soup);
+        const meatArr = this.getDiffValue(meatNum, meat);
+        const vegeArr = this.getDiffValue(vegeNum, vegetable);
+        const soupArr = this.getDiffValue(soupNum, soup);
         
         return [...meatArr, ...vegeArr, ...soupArr];
       },
@@ -170,7 +180,7 @@
       getDiffValue(num, arr) {
         const newArr = []
         while(num) {
-          const index = parseInt(getRandom(1, arr.length));
+          const index = parseInt(this.getRandom(1, arr.length));
           const isNotIncluded = !newArr.some(value => value.name === arr[index].name);
           if(isNotIncluded) {
             newArr.push(arr[index]);
