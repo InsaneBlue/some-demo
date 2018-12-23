@@ -53,23 +53,3 @@ class Fetch {
   }
 
 }
-
-
-
-// fetch.ajax('GET', '/fun/orderMenu/getDish?menu_id=10000')
-//   .then(data => {
-//     console.log(data)
-//   })
-
-
-// const dish_list = [
-//   { name: '番茄鸡蛋汤', price: '12元', type: 3 },
-//   { name: '紫菜蛋汤', price: '12元', type: 3 },
-// ]
-
-// fetch.ajax('POST', '/fun/orderMenu/addDish', {
-//   action: 'add',
-//   menu_id: 10000,
-//   dish_list,
-// })
-

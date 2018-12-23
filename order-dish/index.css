@@ -40,7 +40,7 @@ div {
 
 :root {
   --blue: #409EFF;
-  --Success: #67C23A;
+  --success: #67C23A;
   --warning: #E6A23C;
   --danger: #F56C6C;
   --info: #909399;
@@ -72,6 +72,7 @@ div {
 .right-title {
   height: 40px;
   line-height: 40px;
+  color: var(--blue);
 }
 
 /* 菜单列表 */
@@ -120,4 +121,18 @@ div {
 
 .random-price {
   margin-top: 10px;
+}
+
+/* 选择的菜单 */
+.type-list {
+  display: flex;
+  padding: 5px 0 5px 50px;
+}
+
+.type-title {
+  margin-bottom: 20px;
+}
+
+.right-content-type {
+  margin-bottom: 20px;
 }

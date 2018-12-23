@@ -12,6 +12,10 @@
 
 <body>
 
+  <script src="libs/ajax.js"></script>
+  <script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
   <h1>湖南人家</h1>
   <div id="app" v-cloak>
 
@@ -78,16 +82,20 @@
 
     <div class="right-box">
       <div class="right-title">选择的菜单</div>
-      <div class="right-content">
-        {{detailRecipe}}
+      <div class="right-content" v-if="detailRecipe.length > 0">
+        <div class="right-content-type" v-for="(type, index) in detailRecipe" :key="index">
+          <div class="type-title">{{index | mapDishType}} </div>
+          <div class="type-list" v-for="(dish, ind) in type" :key="ind">
+            <div>{{dish.name}}</div>
+            <div>{{dish.price | concatUnit}}</div>
+          </div>
+        </div>
       </div>
     </div>
 
   </div>
 
-  <script src="libs/ajax.js"></script>
-  <script src="https://unpkg.com/vue/dist/vue.min.js"></script>
-  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
 
 </body>
 
@@ -120,12 +128,11 @@
     },
     computed: {
       detailRecipe() {
-        const newRecipe = [];
         return this.myRecipe.reduce((newRecipe, current) => {
           const { type } = current;
           newRecipe[type] ? newRecipe[type].push(current) : newRecipe[type] = [current];
           return newRecipe;
-        }, newRecipe)
+        }, []);
       }
     },
     created() {
