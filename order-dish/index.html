@@ -59,7 +59,19 @@
 
         </el-tab-pane>
 
-        <el-tab-pane label="自定义菜单">自定义菜单</el-tab-pane>
+        <el-tab-pane label="自选菜单">
+          <el-transfer
+            class="modify-recipe"
+            filterable
+            :filter-method="filterMethod"
+            filter-placeholder="搜索菜名"
+            :titles="['全部菜品', '已选菜品']"
+            v-model="chooseRecipe"
+            :data="filterData"
+            @change="buildChooseRecipe"
+            >
+          </el-transfer>
+        </el-tab-pane>
 
         <el-tab-pane label="查看菜单">
           <div class="left-box-menu">
@@ -119,6 +131,7 @@
       return {
         recipe: [],
         myRecipe: [],
+        chooseRecipe: [],
         totalPrice: 0,
         perPrice: 0,
         randomConfig: {
@@ -134,6 +147,16 @@
           newRecipe[type] ? newRecipe[type].push(current) : newRecipe[type] = [current];
           return newRecipe;
         }, []);
+      },
+      filterData() {
+        return this.recipe.map(dish => {
+          return {
+            key: dish.id,
+            label: dish.name,
+            price: dish.price,
+            type: dish.type,
+          }
+        })
       }
     },
     created() {
@@ -143,6 +166,16 @@
         })
     },
     methods: {
+      // 将自定义选择的菜品id转化为菜单结构
+      buildChooseRecipe() {
+        const { recipe, chooseRecipe } = this;
+        this.myRecipe = chooseRecipe.map(id => {
+          return recipe.filter(dish => dish.id === id)[0];
+        })
+      },
+      filterMethod(query, item) {
+        return item.label.indexOf(query) > -1;
+      },
       // 生成随机菜单
       generateRandomRecipe() {
         const { recipe, randomConfig } = this;

@@ -136,3 +136,20 @@ div {
 .right-content-type {
   margin-bottom: 20px;
 }
+
+/* 自定义菜单 */
+.modify-recipe {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 600px;
+}
+
+.modify-recipe .el-transfer-panel {
+  width: 50%;
+  height: 100%;
+}
+
+.modify-recipe .el-transfer-panel .el-transfer-panel__body, .el-transfer-panel .el-checkbox-group.el-transfer-panel__list {
+  height: 100%;
+}
