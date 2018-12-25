@@ -160,10 +160,23 @@
       }
     },
     created() {
-      fetch.ajax('GET', '/fun/orderMenu/getDish?menu_id=10000')
-        .then(data => {
-          this.recipe = data.body.dishList;
-        })
+      const loading = this.$loading({
+        lock: true,
+        text: '拼命加载中...',
+      });
+
+      fetch.ajax('GET', '/fun/orderMenu/getDish', {
+        menu_id: 10000,
+      })
+      .then(data => {
+        setTimeout(() => {
+          loading.close();
+        }, 500);
+        this.recipe = data.body.dishList;
+      })
+      .catch(error => {
+        loading.close();
+      })
     },
     methods: {
       // 将自定义选择的菜品id转化为菜单结构

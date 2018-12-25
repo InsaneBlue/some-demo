@@ -13,18 +13,21 @@ class Fetch {
 
   ajax(method, url, data = {}, async = true) {
     const xhr = new XMLHttpRequest();
-    const realUrl = this.baseUrl ? this.baseUrl + url: url;
+    let realUrl = this.baseUrl ? this.baseUrl + url: url;
     const params = this._parseParams(method, data);
  
     return new Promise((resolve, reject) => {
-      xhr.open(method, realUrl, async);
-      xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
 
       if(method === 'GET') {
+        realUrl = realUrl + params;
+        xhr.open(method, realUrl, async);
+        xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
         xhr.send(null);
       }
 
       if(method === 'POST') {
+        xhr.open(method, realUrl, async);
+        xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
         xhr.send(params);
       }
 
@@ -44,7 +47,11 @@ class Fetch {
 
   _parseParams(method, data) {
     if(method === 'GET') {
-      
+      let paramStr = '?';
+      for(let key in data) {
+        paramStr += `${key}=${data[key]}&`;
+      }
+      data = paramStr.substring(0, paramStr.length - 1);
     }
     if(method === 'POST') {
       return JSON.parse(data);
