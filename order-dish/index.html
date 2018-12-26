@@ -78,16 +78,40 @@
             <div class="left-box-menu-title">湖南人家</div>  
             <div class="left-box-menu-decription">*菜单仅供参考,请以实际菜单为准</div>
           </div>
-          <div class="left-box-recipe-title">
-            <div>菜名</div>
-            <div>价格</div>
-            <div>类型</div>
-          </div>
-          <div class="left-box-recipe-content" v-for="(dish, index) in recipe" :key="index">
-            <div>{{dish.name}}</div>
-            <div>{{dish.price | concatUnit}}</div>
-            <div>{{dish.type | mapDishType}}</div>
-          </div> 
+
+          <el-table ref="singleTable" :data="recipe" align="center" style="width: 100%">
+            <el-table-column
+              type="index"
+              width="100">
+            </el-table-column>
+            <el-table-column
+              property="name"
+              label="菜名"
+              align="center"
+              min-width="100">
+            </el-table-column>
+            <el-table-column
+              property="price"
+              label="价格"
+              min-width="100"
+              align="center"
+              sortable
+              :formatter="formatPrice">
+            </el-table-column>
+            <el-table-column
+              property="type"
+              label="类型"
+              width="150"
+              sortable
+              :sort-method="sortType"
+              align="center"
+              :filters="filterTypeArr"
+              :filter-method="filterType"
+              :filter-multiple="true"
+              :formatter="formatType">
+            </el-table-column>
+          </el-table>
+
         </el-tab-pane>
 
       </el-tabs>
@@ -107,8 +131,6 @@
     </div>
 
   </div>
-
-
 
 </body>
 
@@ -157,6 +179,20 @@
             type: dish.type,
           }
         })
+      },
+      // 生成菜品类型过滤选项
+      filterTypeArr() {
+        const { recipe } = this;
+        return Object.keys(typeMap).reduce((typeArr, type) => {
+          type = parseInt(type);
+          if(recipe.some(dish => dish.type === type)) {
+            typeArr.push({
+              text: typeMap[type],
+              value: type
+            })
+          }
+          return typeArr;
+        }, [])
       }
     },
     created() {
@@ -247,7 +283,21 @@
       getRandom (min = 1, max) {
         if(max < min) return 1;
         return Math.random() * (max - min) + min;
-      }
+      },
+      formatPrice(row, column, price) {
+        if(!price || typeof price !== 'string') return '';
+        return price.split('.')[0] + ' 元';
+      },
+      formatType(row, column, type) {
+        if(!type || typeof type !== 'number') return '';
+        return typeMap[type];
+      },
+      sortType(a, b) {
+        return a.type - b.type;
+      },
+      filterType(value, row) {
+        return value === row.type;
+      },
     },
     filters: {
       concatUnit(value) {
