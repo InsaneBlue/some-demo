@@ -17,114 +17,129 @@
   <script src="https://unpkg.com/vue/dist/vue.min.js"></script>
   <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 
-  <h1>湖南人家</h1>
   <div id="app" v-cloak>
 
-    <div class="left-box">
-      <el-tabs type="card" stretch="true">
-
-        <el-tab-pane label="随机菜单">
-
-          <div class="random-config">
-            <el-form ref="form" :modle="randomConfig" :inline="true" size="medium" label-width="50px">
-              <el-form-item label="菜数">
-                <el-input-number v-model="randomConfig.dishNum" controls-position="right" :min="1" :max="10"></el-input-number>
-              </el-form-item>
-              <el-form-item label="人数">
-                <el-input-number v-model="randomConfig.personNum" controls-position="right" :min="1" :max="10"></el-input-number>
-              </el-form-item>
-              <el-form-item>
-                <el-button class="random-button" type="primary" @click="generateRandomRecipe" round>生成菜单</el-button>
-              </el-form-item>
-            </el-form>
-          </div>
-
-          <div class="random-result">
-            <div class="left-box-recipe-title">
-              <div>菜名</div>
-              <div>价格</div>
-              <div>类型</div>
+    <el-form label-width="80px">
+      <el-form-item label="当前菜单">
+        <el-select v-model="currentMenuId" @change="fetchMenuData">
+          <el-option
+            v-for="item in menuList"
+            :key="item.menu_id"
+            :label="item.name"
+            :value="item.menu_id">
+          </el-option>
+        </el-select>
+      </el-form-item>
+    </el-form>
+    
+    <h1>{{getMenuName}}</h1>
+    <div class="content">
+      <div class="left-box">
+        <el-tabs type="card" stretch="true">
+  
+          <el-tab-pane label="随机菜单">
+  
+            <div class="random-config">
+              <el-form ref="form" :modle="randomConfig" :inline="true" size="medium" label-width="50px">
+                <el-form-item label="菜数">
+                  <el-input-number v-model="randomConfig.dishNum" controls-position="right" :min="1" :max="recipe.length"></el-input-number>
+                </el-form-item>
+                <el-form-item label="人数">
+                  <el-input-number v-model="randomConfig.personNum" controls-position="right" :min="1" :max="recipe.length"></el-input-number>
+                </el-form-item>
+                <el-form-item>
+                  <el-button class="random-button" type="primary" @click="generateRandomRecipe" round>生成菜单</el-button>
+                </el-form-item>
+              </el-form>
             </div>
-            <div class="left-box-recipe-content" v-for="(dish, index) in myRecipe" :key="index">
+  
+            <div class="random-result">
+              <div class="left-box-recipe-title">
+                <div>菜名</div>
+                <div>价格</div>
+                <div>类型</div>
+              </div>
+              <div class="left-box-recipe-content" v-for="(dish, index) in myRecipe" :key="index">
+                <div>{{dish.name}}</div>
+                <div>{{dish.price | concatUnit}}</div>
+                <div>{{dish.type | mapDishType}}</div>
+              </div> 
+            </div>
+  
+            <div class="random-price" v-if="totalPrice">
+              <div class="total-price">总价: {{totalPrice}}元</div>
+              <div class="per-price">人均: {{perPrice}}元</div>
+            </div>
+  
+          </el-tab-pane>
+  
+          <el-tab-pane label="自选菜单">
+            <el-transfer
+              class="modify-recipe"
+              filterable
+              :filter-method="filterMethod"
+              filter-placeholder="搜索菜名"
+              :titles="['全部菜品', '已选菜品']"
+              v-model="chooseRecipe"
+              :data="filterData"
+              @change="buildChooseRecipe"
+              >
+            </el-transfer>
+          </el-tab-pane>
+  
+          <el-tab-pane label="查看菜单">
+            <div class="left-box-menu">
+              <div class="left-box-menu-title">湖南人家</div>  
+              <div class="left-box-menu-decription">*菜单仅供参考,请以实际菜单为准</div>
+            </div>
+  
+            <el-table ref="singleTable" :data="recipe" align="center" style="width: 100%">
+              <el-table-column
+                type="index"
+                width="100">
+              </el-table-column>
+              <el-table-column
+                property="name"
+                label="菜名"
+                align="center"
+                min-width="100">
+              </el-table-column>
+              <el-table-column
+                property="price"
+                label="价格"
+                min-width="100"
+                align="center"
+                sortable
+                :formatter="formatPrice">
+              </el-table-column>
+              <el-table-column
+                property="type"
+                label="类型"
+                width="150"
+                sortable
+                :sort-method="sortType"
+                align="center"
+                :filters="filterTypeArr"
+                :filter-method="filterType"
+                :filter-multiple="true"
+                :formatter="formatType">
+              </el-table-column>
+            </el-table>
+  
+          </el-tab-pane>
+  
+        </el-tabs>
+      </div>
+  
+      <div class="right-box">
+        <div class="right-title">选择的菜单</div>
+        <div class="right-content" v-if="detailRecipe.length > 0">
+          <div class="right-content-type" v-for="(type, index) in detailRecipe" :key="index">
+            <div class="type-title">{{index | mapDishType}} </div>
+            <div class="type-list" v-for="(dish, ind) in type" :key="ind">
               <div>{{dish.name}}</div>
               <div>{{dish.price | concatUnit}}</div>
-              <div>{{dish.type | mapDishType}}</div>
-            </div> 
-          </div>
-
-          <div class="random-price" v-if="totalPrice">
-            <div class="total-price">总价: {{totalPrice}}元</div>
-            <div class="per-price">人均: {{perPrice}}元</div>
-          </div>
-
-        </el-tab-pane>
-
-        <el-tab-pane label="自选菜单">
-          <el-transfer
-            class="modify-recipe"
-            filterable
-            :filter-method="filterMethod"
-            filter-placeholder="搜索菜名"
-            :titles="['全部菜品', '已选菜品']"
-            v-model="chooseRecipe"
-            :data="filterData"
-            @change="buildChooseRecipe"
-            >
-          </el-transfer>
-        </el-tab-pane>
-
-        <el-tab-pane label="查看菜单">
-          <div class="left-box-menu">
-            <div class="left-box-menu-title">湖南人家</div>  
-            <div class="left-box-menu-decription">*菜单仅供参考,请以实际菜单为准</div>
-          </div>
-
-          <el-table ref="singleTable" :data="recipe" align="center" style="width: 100%">
-            <el-table-column
-              type="index"
-              width="100">
-            </el-table-column>
-            <el-table-column
-              property="name"
-              label="菜名"
-              align="center"
-              min-width="100">
-            </el-table-column>
-            <el-table-column
-              property="price"
-              label="价格"
-              min-width="100"
-              align="center"
-              sortable
-              :formatter="formatPrice">
-            </el-table-column>
-            <el-table-column
-              property="type"
-              label="类型"
-              width="150"
-              sortable
-              :sort-method="sortType"
-              align="center"
-              :filters="filterTypeArr"
-              :filter-method="filterType"
-              :filter-multiple="true"
-              :formatter="formatType">
-            </el-table-column>
-          </el-table>
-
-        </el-tab-pane>
-
-      </el-tabs>
-    </div>
-
-    <div class="right-box">
-      <div class="right-title">选择的菜单</div>
-      <div class="right-content" v-if="detailRecipe.length > 0">
-        <div class="right-content-type" v-for="(type, index) in detailRecipe" :key="index">
-          <div class="type-title">{{index | mapDishType}} </div>
-          <div class="type-list" v-for="(dish, ind) in type" :key="ind">
-            <div>{{dish.name}}</div>
-            <div>{{dish.price | concatUnit}}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -135,6 +150,11 @@
 </body>
 
 <script type="text/javascript">
+
+  const menuList = [
+    { menu_id: 10000, name: '湖南人家（炒菜）'},
+    { menu_id: 10001, name: '湖南人家（快餐）'},
+  ]
 
   const typeMap = {
     1: '荤菜',
@@ -160,6 +180,7 @@
           personNum: 1,
           dishNum: 1,
         },
+        currentMenuId: 10000,
       }
     },
     computed: {
@@ -180,6 +201,9 @@
           }
         })
       },
+      getMenuName() {
+        return menuList.filter(menu => menu.menu_id === this. currentMenuId)[0].name;
+      },
       // 生成菜品类型过滤选项
       filterTypeArr() {
         const { recipe } = this;
@@ -196,25 +220,29 @@
       }
     },
     created() {
-      const loading = this.$loading({
-        lock: true,
-        text: '拼命加载中...',
-      });
-
-      fetch.ajax('GET', '/fun/orderMenu/getDish', {
-        menu_id: 10000,
-      })
-      .then(data => {
-        setTimeout(() => {
-          loading.close();
-        }, 500);
-        this.recipe = data.body.dishList;
-      })
-      .catch(error => {
-        loading.close();
-      })
+      this.fetchMenuData();
     },
     methods: {
+      // 获取菜单数据
+      fetchMenuData() {
+        const loading = this.$loading({
+          lock: true,
+          text: '拼命加载中...',
+        });
+        const { currentMenuId } = this;
+        fetch.ajax('GET', '/fun/orderMenu/getDish', {
+          menu_id: currentMenuId,
+        })
+        .then(data => {
+          setTimeout(() => {
+            loading.close();
+          }, 500);
+          this.recipe = data.body.dishList;
+        })
+        .catch(error => {
+          loading.close();
+        })
+      },
       // 将自定义选择的菜品id转化为菜单结构
       buildChooseRecipe() {
         const { recipe, chooseRecipe } = this;
@@ -242,10 +270,12 @@
         }, 0);
         this.perPrice = (this.totalPrice / personNum).toFixed(2);
       },
-      // 获取菜单中各类型的组成结构
+      // 根据菜总数，确定各类型的组成结构
       getRecipeStructure(dishNum) {
-        const meatNum = Math.ceil((dishNum - 1) / 2);
-        const vegeNum = dishNum - 1 - meatNum;
+        const meatNumMax = this.recipe.filter(dish => dish.type === 1).length;
+        const vegeNumMax = this.recipe.filter(dish => dish.type === 2).length;
+        const meatNum = Math.ceil((dishNum - 1) / 2) > meatNumMax ? meatNumMax : Math.ceil((dishNum - 1) / 2);
+        const vegeNum = dishNum - 1 - meatNum > vegeNumMax ? vegeNumMax : dishNum - 1 - meatNum;
         const soupNum = 1;
         return {
           meatNum,
@@ -270,7 +300,7 @@
       getDiffValue(num, arr) {
         const newArr = []
         while(num) {
-          const index = parseInt(this.getRandom(1, arr.length));
+          const index = parseInt(this.getRandom(0, arr.length));
           const isNotIncluded = !newArr.some(value => value.name === arr[index].name);
           if(isNotIncluded) {
             newArr.push(arr[index]);
@@ -280,7 +310,7 @@
         return newArr;
       },
       // 获取随机整数
-      getRandom (min = 1, max) {
+      getRandom (min = 0, max) {
         if(max < min) return 1;
         return Math.random() * (max - min) + min;
       },
