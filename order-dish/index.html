@@ -274,9 +274,10 @@
       getRecipeStructure(dishNum) {
         const meatNumMax = this.recipe.filter(dish => dish.type === 1).length;
         const vegeNumMax = this.recipe.filter(dish => dish.type === 2).length;
+        const soupNumMax = this.recipe.filter(dish => dish.type === 3).length;
         const meatNum = Math.ceil((dishNum - 1) / 2) > meatNumMax ? meatNumMax : Math.ceil((dishNum - 1) / 2);
         const vegeNum = dishNum - 1 - meatNum > vegeNumMax ? vegeNumMax : dishNum - 1 - meatNum;
-        const soupNum = 1;
+        const soupNum = soupNumMax > 0 ? 1 : 0;
         return {
           meatNum,
           vegeNum,
