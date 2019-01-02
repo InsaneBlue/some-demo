@@ -14,6 +14,7 @@
 <body>
 
   <script src="libs/ajax.js"></script>
+  <script src="libs/skycons.js"></script>
   <script src="https://unpkg.com/vue/dist/vue.min.js"></script>
   <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 
@@ -145,6 +146,10 @@
       </div>
     </div>
 
+    <figure class="icons">
+      <canvas id="weather" width="64" height="64"></canvas>
+      <span>{{weatherText}}</span>
+    </figure>
   </div>
 
 </body>
@@ -181,6 +186,7 @@
           dishNum: 1,
         },
         currentMenuId: 10000,
+        weatherText: ''
       }
     },
     computed: {
@@ -222,7 +228,30 @@
     created() {
       this.fetchMenuData();
     },
+    mounted() {
+      this.generateWeather();
+    },
     methods: {
+      generateWeather() {
+        const skycons = new Skycons({color: '#409eff'});
+        const iconList = [
+          { icon: "clear-day", text:'晴'},
+          { icon: "clear-night", text:'夜间晴'},
+          { icon: "partly-cloudy-day",text:'少云'},
+          { icon: "partly-cloudy-night", text:'夜间少云'},
+          { icon: "cloudy", text:'多云'},
+          { icon: "rain", text:'下雨'},
+          { icon: "sleet", text:'雨夹雪'},
+          { icon: "snow", text:'大雪'},
+          { icon: "wind",text:'大风'},
+          { icon: "fog", text:'大雾'},
+        ];
+
+        const iconIndex = Math.floor(Math.random() * iconList.length);
+        skycons.add('weather', iconList[iconIndex].icon);
+        skycons.play();
+        this.weatherText = iconList[iconIndex].text;
+      },
       // 获取菜单数据
       fetchMenuData() {
         const loading = this.$loading({
