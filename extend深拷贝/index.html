@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+
+<body>
+
+</body>
+<script>
+  const _toString = Object.prototype.toString;
+  const toRawType = (v) => {
+    return _toString.call(v).slice(8, -1);
+  }
+  const isPlainObject = (obj) => {
+    return _toString.call(obj) === '[object Object]';
+  }
+
+  const deepCopy = (obj, hash = new WeakMap()) => {
+    if (hash.has(obj)) return hash.get(obj);
+    let cloneObj = {};
+    hash.set(obj, cloneObj);
+    for (var key in obj) {
+      cloneObj[key] = isPlainObject(obj[key]) ? deepCopy(obj[key], hash) : obj[key];
+    }
+    return cloneObj;
+  }
+
+  // const obj = {
+  //   arr: [111, 222],
+  //   obj: {key: '对象'},
+  //   a: () => {console.log('函数')},
+  //   date: new Date(),
+  //   reg: /正则/ig
+  // }
+
+  // let obj = {};
+  // let a = {
+  //   b: obj
+  // }
+  // obj.a = a;
+
+  // const newObj = deepCopy(obj);
+  // console.log(newObj.obj === obj.obj)
+  // console.log(newObj);
+</script>
+<script>
+  function deepClone(data) {
+    var obj = {};
+    var originQueue = [data];
+    var copyQueue = [obj];
+    //以下两个队列用来保存复制过程中访问过的对象，以此来避免对象环的问题（对象的某个属性值是对象本身）
+    var visitQueue = [];
+    var copyVisitQueue = [];
+    while (originQueue.length > 0) {
+      var _data = originQueue.shift();
+      var _obj = copyQueue.shift();
+      visitQueue.push(_data);
+      copyVisitQueue.push(_obj);
+      for (var key in _data) {
+        var _value = _data[key]
+        if (typeof _value !== 'object') {
+          _obj[key] = _value;
+        } else {
+          //使用indexOf可以发现数组中是否存在相同的对象(实现indexOf的难点就在于对象比较)
+          var index = visitQueue.indexOf(_value);
+          if (index >= 0) {
+            // 出现环的情况不需要再取出遍历
+            _obj[key] = copyVisitQueue[index];
+          } else {
+            originQueue.push(_value);
+            _obj[key] = {};
+            copyQueue.push(_obj[key]);
+          }
+        }
+      }
+    }
+    return obj;
+  }
+
+  let a = {}
+  let obj = {
+    b: {
+      a:a
+    },
+    c: {
+      a:a
+    }
+  };
+
+  // const obj = {
+  //   arr: [111, 222],
+  //   obj: {key: '对象'},
+  //   a: () => {console.log('函数')},
+  //   date: new Date(),
+  //   reg: /正则/ig
+  // }
+
+  const newObj = deepClone(obj);
+  console.log(newObj.b.a === obj.b.a)
+  console.log(newObj);
+</script>
+
+<script>
+const deepClone2 = (o) => {
+  let path = new WeakMap();
+  path.set(o, 'this');
+  let path_ar = ['this'];
+  return (function inner(o) {
+    let result = {};
+    Object.keys(o).forEach(v => {
+      let value = o[v];
+      path_ar.push(v);
+      if(value && typeof value === 'object') {
+        if (path.has(value)) {
+          let dupi_path = path.get(value).split('.').slice(1);
+          let origin = result;
+          dupi_path.forEach(v => {
+            origin = origin[v];
+          });
+          result[v] = origin;
+        } else {
+          path.set(value, path_ar.join('.'));
+          result[v] = inner(value);
+        }
+      } else {
+        result[v] = value;
+      }
+      path_ar.pop();
+    });
+    return result;
+  })(o);
+};
+</script>
+
+<script>
+// sum(1,2).value()、sum(1)(2).value()
+console.time('time0')
+const sum = (...arg1) => {
+  const n = arg1.reduce((a, b) => a + b, 0);
+  const result = (...arg2) => {
+    // return sum.apply(null, [n, ...arg2]);
+    return sum(...[n, ...arg2]);
+  }
+  result.value = () => {console.log(n)};
+  return result;
+}
+sum(1,2).value();
+sum(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4).value();
+console.timeEnd('time0')
+
+console.time('time1')
+const sum2 = (...arg1) => {
+  const resultArr = [...arg1];
+  const result = (...arg2) => {
+    resultArr.push(...arg2);
+    return result;
+  }
+  result.value = () => {
+    n = resultArr.reduce((a, b) => a + b, 0);
+    return console.log(n);
+  }
+  return result;
+}
+sum2(1,2).value();
+sum2(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4).value();
+console.timeEnd('time1')
+
+console.time('time2')
+const sum3 = (...arg) => {
+  // const resultArr = [...arg];
+  return (function(r) {
+    const result = (...arg) => {
+      r.push(...arg);
+      return result;
+    }
+    result.value = () => {
+      n = r.reduce((a, b) => a + b, 0);
+      return console.log(n);
+    }
+    return result;
+  }([...arg]))
+}
+
+sum3(1,2).value();
+sum3(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4)(1)(2)(3)(4).value();
+console.timeEnd('time2')
+
+</script>
+</html>
